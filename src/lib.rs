@@ -10,7 +10,7 @@ pub struct SqlxConnectionManager<DB>
 where
     DB: Database + Sync,
 {
-    url: &'static str,
+    url: String,
     _phantom: PhantomData<DB>,
 }
 
@@ -19,9 +19,12 @@ where
     DB: Database + Sync,
 {
     #[must_use]
-    pub const fn new(url: &'static str) -> Self {
+    pub fn new<S>(url: S) -> Self
+    where
+        S: ToString,
+    {
         Self {
-            url,
+            url: url.to_string(),
             _phantom: PhantomData,
         }
     }
@@ -36,7 +39,7 @@ where
     type Error = sqlx::Error;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {
-        Self::Connection::connect(self.url).await
+        Self::Connection::connect(&self.url).await
     }
 
     async fn check(
