@@ -6,6 +6,9 @@ pub use sqlx;
 use mobc::{Manager, async_trait};
 use sqlx::{Connection as _, Database};
 
+mod migrator;
+pub use migrator::SqlxMigrationExt;
+
 pub struct SqlxConnectionManager<DB>
 where
     DB: Database + Sync,
