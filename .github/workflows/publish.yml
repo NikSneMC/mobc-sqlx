@@ -1,0 +1,23 @@
+name: Publish a new version
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish a package to the crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Login into crates.io
+        run: cargo login ${{ secrets.CRATES_IO }}
+      - name: Build binaries in "release" mode
+        run: cargo build -r
+      - name: "Package for crates.io"
+        run: cargo package
+      - name: "Publish to crates.io"
+        run: cargo publish

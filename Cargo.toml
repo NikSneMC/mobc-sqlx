@@ -1,0 +1,62 @@
+[package]
+name = "mobc-sqlx"
+version = "0.1.0"
+authors = ["NikSne <commits@niksne.ru>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/NikSneMC/mobc-sqlx"
+documentation = "https://docs.rs/mobc-sqlx"
+description = """
+SQLx support for the mobc connection pool
+"""
+keywords = ["sqlx", "pool", "async", "await"]
+exclude = [".github", ".envrc", "flake.*", "shell.nix"]
+rust-version = "1.86.0"
+edition = "2021"
+
+[features]
+default = ["any", "macros", "migrate", "json"]
+
+derive = ["sqlx/derive"]
+macros = ["sqlx/macros"]
+migrate = ["sqlx/migrate"]
+
+# intended mainly for CI and docs
+all-databases = ["sqlx/all-databases"]
+_unstable-all-types = ["sqlx/_unstable-all-types"]
+
+# TLS features
+tls-native-tls = ["sqlx/tls-native-tls"]
+tls-rustls-aws-lc-rs = ["sqlx/tls-rustls-aws-lc-rs"]
+tls-rustls-ring-webpki = ["sqlx/tls-rustls-ring-webpki"]
+tls-rustls-ring-native-roots = ["sqlx/tls-rustls-ring-native-roots"]
+
+# No-op feature used by the workflows to compile without TLS enabled. Not meant for general use.
+tls-none = []
+
+# database
+any = ["sqlx/any"]
+postgres = ["sqlx/postgres"]
+mysql = ["sqlx/mysql"]
+sqlite = ["sqlx/sqlite"]
+sqlite-unbundled = ["sqlx/sqlite-unbundled"]
+sqlite-preupdate-hook = ["sqlx/sqlite-preupdate-hook"]
+
+# types
+json = ["sqlx/json"]
+
+bigdecimal = ["sqlx/bigdecimal"]
+bit-vec = ["sqlx/bit-vec"]
+chrono = ["sqlx/chrono"]
+ipnet = ["sqlx/ipnet"]
+ipnetwork = ["sqlx/ipnetwork"]
+mac_address = ["sqlx/mac_address"]
+rust_decimal = ["sqlx/rust_decimal"]
+time = ["sqlx/time"]
+uuid = ["sqlx/uuid"]
+regexp = ["sqlx/regexp"]
+bstr = ["sqlx/bstr"]
+
+[dependencies]
+mobc = "0.9" # FIXME: https://github.com/importcjj/mobc/issues/103
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio"] }
