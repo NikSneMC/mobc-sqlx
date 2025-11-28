@@ -14,7 +14,7 @@ where
 {
     async fn migrate(
         &self,
-        migrator: Migrator,
+        migrator: &Migrator,
     ) -> Result<(), mobc::Error<sqlx::Error>>;
 }
 
@@ -26,7 +26,7 @@ where
 {
     async fn migrate(
         &self,
-        migrator: Migrator,
+        migrator: &Migrator,
     ) -> Result<(), mobc::Error<sqlx::Error>> {
         let mut connection = self.get().await?;
 
