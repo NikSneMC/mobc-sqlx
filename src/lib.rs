@@ -1,10 +1,9 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, str::FromStr as _};
 
 pub use mobc;
-pub use sqlx;
-
 use mobc::{Manager, async_trait};
-use sqlx::{Connection as _, Database};
+pub use sqlx;
+use sqlx::{Connection, Database};
 
 mod migrator;
 pub use migrator::SqlxMigrationExt;
@@ -13,7 +12,7 @@ pub struct SqlxConnectionManager<DB>
 where
     DB: Database + Sync,
 {
-    url: String,
+    connect_options: <DB::Connection as Connection>::Options,
     _phantom: PhantomData<DB>,
 }
 
@@ -22,14 +21,18 @@ where
     DB: Database + Sync,
 {
     #[must_use]
-    pub fn new<S>(url: S) -> Self
-    where
-        S: ToString,
-    {
+    pub fn new(
+        connect_options: <DB::Connection as Connection>::Options,
+    ) -> Self {
         Self {
-            url: url.to_string(),
+            connect_options,
             _phantom: PhantomData,
         }
+    }
+
+    pub fn from_url(url: &str) -> Result<Self, sqlx::Error> {
+        let options = <DB::Connection as Connection>::Options::from_str(url)?;
+        Ok(Self::new(options))
     }
 }
 
@@ -42,7 +45,7 @@ where
     type Error = sqlx::Error;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {
-        Self::Connection::connect(&self.url).await
+        Self::Connection::connect_with(&self.connect_options).await
     }
 
     async fn check(
