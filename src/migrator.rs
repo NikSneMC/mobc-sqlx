@@ -19,7 +19,8 @@ where
 }
 
 #[async_trait]
-impl<DB> SqlxMigrationExt<DB> for Pool<SqlxConnectionManager<DB>>
+impl<DB> SqlxMigrationExt<DB>
+    for Pool<SqlxConnectionManager<DB>>
 where
     DB: Database + Sync,
     <DB as Database>::Connection: Migrate,
@@ -31,7 +32,7 @@ where
         let mut connection = self.get().await?;
 
         migrator
-            .run_direct(&mut *connection)
+            .run_direct(None, &mut *connection, false)
             .await
             .map_err(sqlx::Error::from)?;
 

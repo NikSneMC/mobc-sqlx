@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     name: Publish a package to the crates.io
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@master
       - name: Login into crates.io

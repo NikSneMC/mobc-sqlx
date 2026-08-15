@@ -1,6 +1,6 @@
 [package]
 name = "mobc-sqlx"
-version = "2.0.0"
+version = "3.0.0"
 authors = ["NikSne <commits@niksne.ru>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/NikSneMC/mobc-sqlx"
@@ -58,6 +58,6 @@ bstr = ["sqlx/bstr"]
 
 [dependencies]
 mobc = "0.9" # FIXME: https://github.com/importcjj/mobc/issues/103
-sqlx = { version = "0.8", default-features = false, features = [
+sqlx = { version = "0.9", default-features = false, features = [
   "runtime-tokio",
 ] }

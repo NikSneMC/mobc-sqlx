@@ -12,7 +12,8 @@ pub struct SqlxConnectionManager<DB>
 where
     DB: Database + Sync,
 {
-    connect_options: <DB::Connection as Connection>::Options,
+    connect_options:
+        <DB::Connection as Connection>::Options,
     _phantom: PhantomData<DB>,
 }
 
@@ -30,9 +31,13 @@ where
         }
     }
 
-    pub fn from_url(url: &str) -> Result<Self, sqlx::Error> {
-        let options = <DB::Connection as Connection>::Options::from_str(url)?;
-        Ok(Self::new(options))
+    pub fn from_url(
+        url: &str,
+    ) -> Result<Self, sqlx::Error> {
+        <DB::Connection as Connection>::Options::from_str(
+            url,
+        )
+        .map(Self::new)
     }
 }
 
@@ -44,8 +49,13 @@ where
     type Connection = DB::Connection;
     type Error = sqlx::Error;
 
-    async fn connect(&self) -> Result<Self::Connection, Self::Error> {
-        Self::Connection::connect_with(&self.connect_options).await
+    async fn connect(
+        &self,
+    ) -> Result<Self::Connection, Self::Error> {
+        Self::Connection::connect_with(
+            &self.connect_options,
+        )
+        .await
     }
 
     async fn check(

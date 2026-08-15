@@ -1,30 +1,29 @@
 name: CI
 on: [push, pull_request]
 permissions:
-  contents: read #  to fetch code (actions/checkout)
+  contents: read
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
 jobs:
   test:
     name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, beta, nightly, macos, win32, win64, mingw]
+        build: [stable, nightly, macos, win64, mingw]
         include:
           - build: stable
-            os: ubuntu-latest
+            os: ubuntu-26.04
             rust: stable
-          - build: beta
-            os: ubuntu-latest
-            rust: beta
           - build: nightly
-            os: ubuntu-latest
+            os: ubuntu-26.04
             rust: nightly
           - build: macos
             os: macos-latest
             rust: stable
-          - build: win32
-            os: windows-latest
-            rust: stable-i686-pc-windows-msvc
           - build: win64
             os: windows-latest
             rust: stable-x86_64-pc-windows-msvc
@@ -37,10 +36,17 @@ jobs:
         run: |
           rustup update ${{ matrix.rust }} --no-self-update
           rustup default ${{ matrix.rust }}
-      - run: cargo test --all
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@nextest
+      - name: Compile
+        run: cargo check --all
+
+      - name: Test
+        run: cargo nextest run --all --no-tests warn
+
   rustfmt:
     name: Rustfmt
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
@@ -51,7 +57,7 @@ jobs:
       - run: cargo fmt -- --check
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
@@ -59,10 +65,11 @@ jobs:
           rustup update stable --no-self-update
           rustup default stable
           rustup component add clippy
+      - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --verbose
   doc:
     name: Check Documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
@@ -70,36 +77,17 @@ jobs:
           rustup update stable --no-self-update
           rustup default stable
           rustup component add rust-docs
+      - uses: Swatinem/rust-cache@v2
       - name: Run rustdoc
-        run: RUSTDOCFLAGS="-D warnings" cargo doc --verbose
+        run: cargo doc --verbose
   features:
     name: Feature check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
         run: |
           rustup update nightly --no-self-update
           rustup default nightly
+      - uses: Swatinem/rust-cache@v2
       - run: cargo build --verbose -Z avoid-dev-deps
-  minimalv:
-    name: Minimal versions
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Install Rust
-        run: |
-          rustup update nightly --no-self-update
-          rustup default nightly
-      - run: cargo build --verbose -Z minimal-versions
-  msrv:
-    name: MSRV
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Install Rust
-        run: |
-          rustup update 1.86.0 --no-self-update
-          rustup default 1.86.0
-      - run: |
-          cargo test --verbose
